@@ -20,3 +20,5 @@ Therefore, the goal of the project is to build a model that can **predict Metacr
 ## Modeling Strategy:
 
 The 3910 games with ground-truth Metacritic scores are used for training (tuning), validation and testing. I will try different classes of models and tune their hyperparameter. The winning model based on validation accuracy will be used to predict Metacritic scores on games that don't have it. The accuracy of the predictions should be similar to the accuracy on the test set.
+
+Optinal: train a classifier for probability of having Metacritic score. The idea is, predicted score might be reliable for games similar to the training games, but unreliable for games that are more different. The probability measures this similarity.

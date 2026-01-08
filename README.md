@@ -34,6 +34,8 @@ Try out `from ydata_profiling import ProfileReport`
 
 Do multi-hot encoding with `from sklearn.preprocessing import MultiLabelBinarizer` to columns like languages, tags and genres.
 
-Do some kind of embedding for text like description and reviews.
+Do some kind of embedding for text like description and reviews. 
 
 Do some kind of embedding for images.
+
+[CLIP](https://github.com/openai/CLIP) can embed image and text into similar representation. Let's use this one.

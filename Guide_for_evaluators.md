@@ -16,7 +16,7 @@ Please feel free to grade my project as you see fit.
     * The dataset is `data/steam_game_dataset.parquet`
     * All the 4 notebooks in `notebooks/` can be run. The running time is stated at the top of each file.
 * Model deployment
-    * The model is deployed to the cloud. You can test it [here](https://steam-game-critic-score-1023320639620.us-east1.run.app/).
+    * Model is deployed with FastAPI. See `app/main.py`.
 * Dependency and enviroment management
     * See `README.md` for instructions to activate the environment.
 * Containerization

@@ -1,2 +1,5 @@
 .ipynb_checkpoints/*
 train-00000-of-00001-e2ed184370a06932.parquet
+*/*-checkpoint.ipynb
+notebooks/.ipynb_checkpoints/3_prediction-checkpoint.ipynb
+notebooks/.ipynb_checkpoints/2_tune_models-checkpoint.ipynb

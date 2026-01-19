@@ -11,7 +11,7 @@ Please feel free to grade my project as you see fit.
 * Model training
     * See `./notebooks/2_tune_models.ipynb`.
 * Exporting notebook to script
-    * See `2_training_final.py`.
+    * See `./notebooks/train_best_XGBR.py`.
 * Reproducibility
     * The dataset is `./data/steam_game_dataset.parquet`
     * All the 4 notebooks in `./notebooks` can be run. The running time is stated at the top of each file.

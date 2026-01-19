@@ -1,15 +1,15 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 # Copy the 'uv' and 'uvx' executables from the latest uv image into /bin/ in this image
 # 'uv' is a fast Python package installer and environment manager
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set the working directory inside the container to /code
+# Set the working directory inside the container to /app
 # All subsequent commands will be run from here
-WORKDIR /code
+WORKDIR /app
 
 # Add the virtual environment's bin directory to the PATH so Python tools work globally
-ENV PATH="/code/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy the project configuration files into the container
 # pyproject.toml     → project metadata and dependencies
@@ -17,25 +17,21 @@ ENV PATH="/code/.venv/bin:$PATH"
 # .python-version    → Python version specification
 COPY "pyproject.toml" "uv.lock" ".python-version" ./
 
+# Copy required project files into the container
+COPY app ./app
+COPY interactive ./interactive
+COPY models ./models
+COPY data ./data
+
 # Install dependencies exactly as locked in uv.lock, without updating them
 RUN uv sync --locked
 
-# Copy application code and model data into the container
-
-
-
-
-#--------------------------------------------------------------------
-# need to fill in the actual file names later
-#COPY "predict.py" ./
-#COPY "final_model_trained.pkl" "dv_full.pkl" "default_nulldf.pkl" ./
-
-# Expose TCP port 9696 so it can be accessed from outside the container
-EXPOSE 9696
+# Expose TCP port 8080 so it can be accessed from outside the container
+EXPOSE 8080
 
 # Run the application using uvicorn (ASGI server)
 # predict:app → refers to 'app' object inside predict.py
 # --host 0.0.0.0 → listen on all interfaces
-# --port 9696    → listen on port 9696
-ENTRYPOINT ["uvicorn", "predict:app", "--host", "0.0.0.0", "--port", "9696"]
+# --port 8080    → listen on port 8080
+ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
 #--------------------------------------------------------------------

@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 from rapidfuzz import process, fuzz
 
-from predict_examples import EXAMPLE_1, EXAMPLE_2, EXAMPLE_3
-from help_funcs import search_rows, col_to_feat
+from app.predict_examples import EXAMPLE_1, EXAMPLE_2, EXAMPLE_3
+from app.help_funcs import search_rows, col_to_feat, feat_to_pred
 
 app = FastAPI()
 
@@ -78,7 +78,7 @@ def search(
         description="Fuzzy search is supported.",
     )
 ):
-    matches = search_rows(df_results, "name", s,fuzzy_threshold=75)
+    matches = search_rows("name", s,fuzzy_threshold=75)
     pd.options.display.float_format = "{:.1f}".format
     return matches.to_dict('records')
     
@@ -91,13 +91,10 @@ def predict(
 ):
     # Build X exactly how your model expects it
     df = pd.DataFrame([x])
-    df = df.reindex(columns=EXPECTED_COLS)
 
     df_X_z = col_to_feat(df)
-    all_X = df_X_z.to_numpy(dtype="float32")
-    y_pred = SS_y.inverse_transform(model.predict(all_X).reshape(-1, 1)).squeeze(-1)
+    y_pred,p_pred = feat_to_pred(df_X_z)
     
-    p_pred = confmodel.predict_proba(df_X_z)[:, 1]
     if p_pred>0.7:
         conf_tier = 4
         conf_label = "very high"

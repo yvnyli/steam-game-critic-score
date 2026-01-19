@@ -38,6 +38,9 @@ tsvd_tags = data['tsvd_tags']
 df_results = pd.read_parquet('./data/df_results.parquet')
 
 def col_to_feat(df):
+    # workaround for fastapi deleting Nones
+    df = df.reindex(columns=EXPECTED_COLS)
+    
     # df contains df (original parquet) values
     # this function get it to look like df_X_z for the model
     # 2. convert datetime
@@ -171,23 +174,28 @@ def col_to_feat(df):
     df_X_z[continuous_cols] = SS_X.transform(df_X[continuous_cols])
     return df_X_z
 
+def feat_to_pred(df_X_z):
+    
+    all_X = df_X_z.to_numpy(dtype="float32")
+    y_pred = SS_y.inverse_transform(model.predict(all_X).reshape(-1, 1)).squeeze(-1)
+    p_pred = confmodel.predict_proba(df_X_z)[:, 1]
+    
+    return (y_pred,p_pred)
 
-
-def search_rows(df,col,q,
+def search_rows(col,q,
     fuzzy_threshold=80,fuzzy_topk=50):
     
-    s = df[col].astype("string")
+    s = df_results[col].astype("string")
 
     if q is None or str(q).strip() == "":
-        return df.iloc[0:0]  # empty result
+        return df_results.iloc[0:0]  # empty result
 
 
     choices = s.fillna("").tolist()
     hits = process.extract(q, choices, scorer=fuzz.WRatio, limit=fuzzy_topk)
     keep = [(match, score, idx) for (match, score, idx) in hits if score >= fuzzy_threshold]
     if not keep:
-        return df.iloc[0:0]
+        return df_results.iloc[0:0]
     idxs = [k[2] for k in keep]
     scores = [k[1] for k in keep]
-    # return df.iloc[idxs].assign(_fuzzy_score=scores)
-    return df.iloc[idxs]
+    return df_results.iloc[idxs]

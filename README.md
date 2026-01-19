@@ -3,6 +3,11 @@ Give ~80K games a score similar to Metacritic. See what the model says about you
 
 ML Zoomcamp 2025: If you are here for peer review, please check out [Guide_for_evaluators.md](https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/Guide_for_evaluators.md) for a map of where things are. Thank you.
 
+### Setup (Windows):
+Environment: Clone this repo. In cmd, cd to the folder, and run `uv sync --frozen`. If packages are installed successfully, activate the virtual environment with `.venv\Scripts\activate`, and run `jupyter lab` to launch jupyter. You can explore the notebooks in `notebooks/`.
+
+Docker: 
+
 ## Dataset:
 
 ### **Steam Games Dataset** ([link](https://huggingface.co/datasets/FronkonGames/steam-games-dataset))

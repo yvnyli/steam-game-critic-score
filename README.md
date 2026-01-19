@@ -61,33 +61,37 @@ For the bonus mission which is to make an imputation confidence measure, I train
 | 0.1–0.4      | Medium confidence     | 29.3% | 3921 (4.9%) |
 | <= 0.1        | Low confidence (Extrapolation)  | 10.3% | 74536 (93.6%) |
 
-
+#### Training:
 I trained linear (Elastic net), tree based (XGBoost), and neural network (multi-layer perceptron) regressors. Tuned hyperparameter for each model class on 5-fold CV of 85% data. 
 <table align="center">
   <tr>
-    <td><h6>Tuning</h6></td>
-    <td><h6>Performance</h6></td>
+    <td><h5>Model Class</h5>
+    <td><h5>Tuning</h5></td>
+    <td><h5>Performance</h5></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_EN.png" alt="Tuning elastic nets" width="400"></td>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_EN.png" alt="Error distribution of the best elastic net model" width="400"></td>
+    <td>Elastic Net</td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tuning_EN.png" alt="Tuning elastic nets" height="200"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_EN.png" alt="Error distribution of the best elastic net model" height="200"></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_XGBR.png" alt="Tuning XGBRegressor" width="400"></td>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_XGBR.png" alt="Error distribution of the best XGBRegressor model" width="400"></td>
+    <td>XGBRegressor</td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tuning_XGBR.png" alt="Tuning XGBRegressor" height="200"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_XGBR.png" alt="Error distribution of the best XGBRegressor model" height="200"></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_MLP.png" alt="Tuning multi-layer perceptron" width="400"></td>
-    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_MLP.png" alt="Error distribution of the best multi-layer perceptron model" width="400"></td>
+    <td>Multi-layer Perceptron</td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tuning_MLP.png" alt="Tuning multi-layer perceptron" height="200"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_MLP.png" alt="Error distribution of the best multi-layer perceptron model" height="200"></td>
   </tr>
 </table>
-As you can see in the error distributions, the models had very similar performances. This suggests the training data has limited predicting power, and is linear enough for the basic model to learn.
+As you can see in the error distributions, the models had very similar performances. This suggests the training data has limited predicting power, and is linear enough for the basic model to learn. More complex models cannot reduce the noise in the dataset, i.e. the difference between sample that are not captured by the features.
 
 In the end, the best XGBoost model won over the other two with a very slight advantage on the 15% testing data, so it was used to make ~80K predictions.
 
-You must be wondering, does the model performance really follow the confidence measure? Here is the result. Higher confidence tiers indeed have smaller errors than lower confidence tiers, but only by a little. The difference is visible in the plot but not statistically significant.
+You must be wondering, does the model performance really follow the confidence measure? Here is the result. Higher confidence tiers indeed have smaller errors than lower confidence tiers, but only by a little. The difference is visible in the plot but not statistically significant. MLP performance follows confidence the most, even though the confidence model is closer to elastic net. Is there something to it?
 <div align="center">
-  <img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/AE_conf_tier.png" alt="Absolute error by confidence tier" width="600">
+  <img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/AE_conf_tier.png" alt="Absolute error by confidence tier" width="800">
 </div>
 
 ## Try it out on the cloud:

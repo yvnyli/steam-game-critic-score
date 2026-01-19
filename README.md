@@ -26,20 +26,71 @@ The **3910 games with ground-truth Metacritic scores** are used for training (va
 Bonus: I also train a classifier for probability of having Metacritic score. The idea is, predicted score might be reliable for games similar to the training games, but unreliable for games that are more different. The probability measures this similarity. I then labeled games into 4 **confidence tiers**: very low, low, medium, and high, which puts a grain of salt on the interpretation of the scores.
 
 
-## Results: 
+## Data processing: 
+- Numerics: There are 15 numerical columns. In all of them, the dominant mode is 0, making the rest of the distribution hard to see/take into effect. So I made two features out of each column. One is a binary indicating whether the value is zero (zero actually means missing data in many of them). The other is the value, with log transformation applied for performance. The transformed values look like these:
 
-Data processing: 
-- Numerics: There are 15 numerical columns. In all of them, the dominant mode is 0, making the rest of the distribution hard to see/take into effect. So I made two features out of each column. One is a binary indicating whether the value is zero (zero actually means missing data in many of them). The other is the value, with log transformation applied for performance.
-
-  ![Histograms of numerics](https://www.markdownlang.com/markdown-logo.png)
+<div align="center">
+  <img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/log1ps.png" alt="Histograms of numerics" width="800">
+</div>
   
 - Release date: The only datetime column, which I turned into a numeric feature by subtracting the Epoch (days since 1/1/1970).
 - Multi-hot: There are 5 columns containing lists of categorical labels, which can be represented by multi-hot vectors. These columns are categories, genres, tags, languages, and audio languages. Word clouds below. The problem is that there are 732 multi-hot features out of the 5 columns, which is too many for our training data size (732:3910 is roughly 1:5). So I used SVD to reduce dimensionality down to 70 features. This also eliminated colinearity.
 
-Models: I trained linear (Elastic net), tree based (XGBoost), and neural network (multi-layer perceptron) regressors. Tuned hyperparameter for each model class on 5-fold CV of 85% data. The best XGBoost model had higher performance than the other two on the 15% testing data, and was used to make ~80K predictions.
+<table align="center">
+  <tr>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/wordcloud_categories.png" alt="Word cloud of categories" width="400"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/wordcloud_genres.png" alt="Word cloud of genres" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/wordcloud_tags.png" alt="Word cloud of tags" width="400"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/wordcloud_lang.png" alt="Word cloud of languages" width="400"></td>
+  </tr>
+</table>
+
+- Other indicators: Other columns such as "support email", "about the game", "notes" and "reviews" are not usable for the model immediately, and they have big portions of missing values. So I simply created indicator (binary) features that =1 if the field is not NA and =0 otherwise.
+
+In total, the training data matrix is 3910 samples by 137 features.
+  
+## Results: 
+For the bonus mission which is to make an imputation confidence measure, I trained a simple (i.e. linear) and stable (i.e. l1 regularized) logistic regression on whether or not a game has a Metacritic score (=1 if has score, =0 otherwise). I made sure the model is well-calibrated, meaning that in all the games that receive a ~0.8 probability by the model, 80% of them have a score, and so on. Because so few games in the dataset have a score (4.7%), this confidence model is very cautious, giving only 4.3% of games p>0.4. This table is how I decided to group games into confidence tiers.
+
+| Predicted p | Interpretation | Percent of games with score in this tier| Number (%) of games without score in this tier|
+| :------------:| :-----------------------------------:|:--------------------------:|:--------------:|
+| (p > 0.7)    | Very high confidence  | 33.1% | 296 (0.4%) |
+| 0.4–0.7      | High confidence       | 27.3% | 897 (1.1%) |
+| 0.1–0.4      | Medium confidence     | 29.3% | 3921 (4.9%) |
+| <= 0.1        | Low confidence (Extrapolation)  | 10.3% | 74536 (93.6%) |
 
 
-## Try it out:
+I trained linear (Elastic net), tree based (XGBoost), and neural network (multi-layer perceptron) regressors. Tuned hyperparameter for each model class on 5-fold CV of 85% data. 
+<table align="center">
+  <tr>
+    <td><h6>Tuning</h6></td>
+    <td><h6>Performance</h6></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_EN.png" alt="Tuning elastic nets" width="400"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_EN.png" alt="Error distribution of the best elastic net model" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_XGBR.png" alt="Tuning XGBRegressor" width="400"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_XGBR.png" alt="Error distribution of the best XGBRegressor model" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/tunine_MLP.png" alt="Tuning multi-layer perceptron" width="400"></td>
+    <td><img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/errors_MLP.png" alt="Error distribution of the best multi-layer perceptron model" width="400"></td>
+  </tr>
+</table>
+As you can see in the error distributions, the models had very similar performances. This suggests the training data has limited predicting power, and is linear enough for the basic model to learn.
+
+In the end, the best XGBoost model won over the other two with a very slight advantage on the 15% testing data, so it was used to make ~80K predictions.
+
+You must be wondering, does the model performance really follow the confidence measure? Here is the result. Higher confidence tiers indeed have smaller errors than lower confidence tiers, but only by a little. The difference is visible in the plot but not statistically significant.
+<div align="center">
+  <img src="https://github.com/yvnyli/MLZoomcamp_Project2/blob/main/images/AE_conf_tier.png" alt="Absolute error by confidence tier" width="600">
+</div>
+
+## Try it out on the cloud:
 
 Cloud deployment: 
 
